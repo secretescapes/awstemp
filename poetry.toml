@@ -1,0 +1,3 @@
+[repositories]
+[repositories.artifactory]
+url = "https://secretescapes.jfrog.io/artifactory/api/pypi/python"
