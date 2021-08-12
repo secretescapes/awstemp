@@ -1,21 +1,11 @@
 # awstemp
 
-Command line interfact for assuming AWS IAM roles.
+Command line interface for assuming AWS IAM roles and rewriting AWS Credentials and Config files.
 
 ## Installation
 
 ```
-pipx install awstemp --pip-args="--extra-index-url https://user:token@secretescapes.jfrog.io/artifactory/api/pypi/python/simple"
-```
-
-
-## Publishing
-
-```
-export POETRY_HTTP_BASIC_ARTIFACTORY_USERNAME=username
-export POETRY_HTTP_BASIC_ARTIFACTORY_PASSWORD=token
-
-poetry publish -vvv --repository artifactory
+pipx install git+https://github.com/secretescapes/awstemp
 ```
 
 ## Autocomplete
@@ -28,13 +18,13 @@ You will need to install `argcomplete` in order to make use of this functionalit
 Most common setups:
 
 
-`Bash`
+### `Bash`
 
 ```
 register-python-argcomplete awstemp > /etc/bash_completion.d/awstemp
 ```
 
-`Zsh`
+### `Zsh`
 
 Add the following to your `~/.zshrc`
 
@@ -45,7 +35,7 @@ eval "$(register-python-argcomplete awstemp)"
 ```
 
 
-`Fish`
+### `Fish`
 
 ```
 register-python-argcomplete --shell fish awstemp > ~/.config/fish/completions/awstemp.fish
