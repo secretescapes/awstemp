@@ -17,10 +17,8 @@ setup:
 	pyenv install ${PY39} --skip-existing
 	pyenv local ${PY37} ${PY38} ${PY39}
 
-test:
+test: setup
 	poetry run tox
 
-build:
+build: setup
 	poetry build
-
-
