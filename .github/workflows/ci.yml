@@ -44,4 +44,4 @@ jobs:
           poetry run flake8 awstemp/ tests/
 
       - name: Unit Tests
-        run: poetry run pytest --junitxml results.xml
+        run: poetry run pytest
