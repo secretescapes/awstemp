@@ -1,3 +1,5 @@
+[![ci](https://github.com/secretescapes/awstemp/actions/workflows/ci.yml/badge.svg)](https://github.com/secretescapes/awstemp/actions/workflows/ci.yml)
+
 # awstemp
 
 Command line interface for assuming AWS IAM roles and rewriting AWS Credentials and Config files.

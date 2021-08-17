@@ -36,5 +36,15 @@ jobs:
       - name: Install Dependencies
         run: poetry install
 
-      - name: Code Quality
-        run: poetry run black . --check
+      - name: Linting
+        run: |
+          poetry run black . --check --verbose --diff
+          poetry run isort . --profile black
+          poetry run pylint awstemp/ tests/
+          poetry run flake8 awstemp/ tests/
+
+      - name: Unit Tests
+        run: |
+          poetry run pytest --junitxml results.xml
+          poetry run coverage report --show-missing
+          poetry run coverage xml --fail-under=100
