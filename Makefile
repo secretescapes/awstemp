@@ -22,3 +22,6 @@ test: setup
 
 build: setup
 	poetry build
+
+install: build
+	pip install . --use-feature=in-tree-build

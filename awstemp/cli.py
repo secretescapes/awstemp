@@ -9,10 +9,8 @@ import argcomplete
 from awstemp import awstemp
 
 
-def main():
-    """main function"""
-
-    cli = awstemp.AWSTEMP()
+def arguments(cli):
+    """Define CLI parameters"""
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="name")
@@ -64,7 +62,14 @@ def main():
     sessions_parser.set_defaults(func=cli.sessions)
 
     argcomplete.autocomplete(parser)
-    args = parser.parse_args()
+    return parser, parser.parse_args()
+
+
+def main():
+    """main function"""
+
+    cli = awstemp.AWSTEMP()
+    parser, args = arguments(cli)
 
     if args.name == "assume":
         cli.assume(args.role, args.alias)
