@@ -2,11 +2,32 @@
 CLI wrapper for awstemp package
 """
 import argparse
+import importlib.resources
+import os
 import sys
 
 import argcomplete
+import psutil
 
 from awstemp import awstemp
+
+INIT_MESSAGE = {
+    "fish": (
+        "# Load awstemp wrapper automatically by appending\n"
+        "# the following to ~/.config/fish/config.fish:\n\n"
+        "awstemp init - | source"
+    ),
+    "bash": (
+        "# Load awstemp wrapper automatically by appending\n"
+        "# the following to ~/.bash_profile:\n\n"
+        'eval "$(awstemp init -)"'
+    ),
+    "zsh": (
+        "# Load awstemp wrapper automatically by appending\n"
+        "# the following to ~/.zshrc:\n\n"
+        'eval "$(awstemp init -)"'
+    ),
+}
 
 
 def arguments(cli):
@@ -33,7 +54,7 @@ def arguments(cli):
     backup_parser.set_defaults(func=cli.backup)
 
     list_parser = subparsers.add_parser(
-        "clean", help="cleans up expired session profiles"
+        "clean", help="Cleans up expired session profiles"
     )
     list_parser.set_defaults(func=cli.clean)
 
@@ -47,6 +68,21 @@ def arguments(cli):
         default=None,
         help="Profile to export",
     ).completer = cli.export_completer
+
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Configure the shell environment for awstemp",
+        description="Configure the shell environment for awstemp",
+    )
+    init_parser.add_argument(
+        "-", dest="init", action="store_true", help="Return the wrapper source script"
+    )
+    init_parser.add_argument(
+        "shell",
+        nargs="?",
+        default=None,
+        help="Override shell detection. Supports `bash`, `zsh`, and `fish`",
+    )
 
     list_parser = subparsers.add_parser("list", help="Lists the profiles available")
     list_parser.set_defaults(func=cli.list)
@@ -65,6 +101,28 @@ def arguments(cli):
     return parser, parser.parse_args()
 
 
+def get_shell(shell):
+    """Get the parent shell"""
+    if shell is None:
+        shell = psutil.Process(os.getppid()).name()
+    if shell in ["bash", "zsh", "fish"]:
+        return shell
+    print(f"{shell}: not supported")
+    sys.exit(1)
+
+
+def setup_shell(args):
+    """Provide shell initialization"""
+
+    shell = get_shell(args.shell)
+    if not args.init:
+        print(INIT_MESSAGE[shell])
+    else:
+        shell = "bash" if shell == "zsh" else shell
+        # print(importlib_resources.files("awstemp.wrappers").joinpath(shell).read_text())
+        print(importlib.resources.read_text("awstemp.wrappers", shell))
+
+
 def main():
     """main function"""
 
@@ -77,6 +135,8 @@ def main():
         cli.export(args.profile)
     elif args.name in ["backup", "clean", "list", "status", "sessions"]:
         args.func()
+    elif args.name == "init":
+        setup_shell(args)
     else:
         parser.print_help()
         sys.exit(1)

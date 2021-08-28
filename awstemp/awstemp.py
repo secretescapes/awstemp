@@ -119,7 +119,7 @@ class AWSTEMP:
         if config_section not in config.sections() and cfg["region"]:
             config.add_section(config_section)
             config.set(config_section, "region", cfg["region"])
-            with open(self.config_path, "w") as config_file:
+            with open(self.config_path, "w", encoding="locale") as config_file:
                 config.write(config_file)
 
         if alias not in credentials.sections():
@@ -138,7 +138,7 @@ class AWSTEMP:
             alias, "aws_expiration", response["Credentials"]["Expiration"].isoformat()
         )
 
-        with open(self.credentials_path, "w") as credentials_file:
+        with open(self.credentials_path, "w", encoding="locale") as credentials_file:
             credentials.write(credentials_file)
 
         self.syntax(self.config_path)
@@ -159,10 +159,10 @@ class AWSTEMP:
                 if self.config.has_section(f"profile {section}"):
                     self.config.remove_section(f"profile {section}")
 
-        with open(self.credentials_path, "w") as credentials_file:
+        with open(self.credentials_path, "w", encoding="locale") as credentials_file:
             self.credentials.write(credentials_file)
 
-        with open(self.config_path, "w") as config_file:
+        with open(self.config_path, "w", encoding="locale") as config_file:
             self.config.write(config_file)
 
         self.syntax(self.config_path)
@@ -171,10 +171,10 @@ class AWSTEMP:
     def syntax(self, path):
         """Add vim ini syntax if not exists"""
 
-        with open(path, "r") as ini_file:
+        with open(path, "r", encoding="locale") as ini_file:
             data = ini_file.readlines()
         if self.vimsyntax not in data:
-            with open(path, "a") as ini_file:
+            with open(path, "a", encoding="locale") as ini_file:
                 ini_file.write(self.vimsyntax)
 
     def list(self):

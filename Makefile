@@ -8,7 +8,7 @@ usage:
 	@echo "No target selected"
 
 clean:
-	rm -rf dist coverage.xml results.unit.xml .coverage .tox
+	rm -rf dist *.xml .coverage .tox
 	find . -type d -name __pycache__ -exec rm -rv {} +
 
 setup:

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+while read -r line
+do
+  alias "aws_${line}=export AWS_PROFILE=${line}"
+done < <(grep -Po '^\[\K[^\]]+' ~/.aws/credentials)
+
+while read -r line
+do
+  if ! grep -q "\\[${line}\\]" ~/.aws/credentials
+  then
+    alias "aws_${line}=awstemp assume ${line} && export AWS_PROFILE=${line}_temp"
+  fi
+done < <(grep -Po '^\[profile\s+\K[^\]]+' ~/.aws/config)
+
+function aws_whoami () {
+  aws sts get-caller-identity
+}
+
+function aws_unset() {
+  for name in AWS_PROFILE AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+  do
+    unset $name
+  done
+}

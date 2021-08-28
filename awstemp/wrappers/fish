@@ -1,0 +1,23 @@
+#!/usr/bin/env fish
+
+while read -la line
+  alias aws_$line "export AWS_PROFILE=$line"
+end <(grep -Po '^\[\K[^\]]+' ~/.aws/credentials|psub)
+
+while read -la line
+  if ! grep -q "\[$line\]" ~/.aws/credentials
+    alias aws_$line "awstemp assume $line && export AWS_PROFILE="$line"_temp"
+  end
+end <(grep -Po '^\[profile\s+\K[^\]]+' ~/.aws/config|psub)
+
+function aws_unset
+  for name in AWS_PROFILE AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+    if set -q $name
+      set -e $name
+    end
+  end
+end
+
+function aws_whoami
+  aws sts get-caller-identity
+end

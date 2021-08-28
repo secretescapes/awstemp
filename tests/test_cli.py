@@ -71,6 +71,21 @@ def test_main_calls_cli_export(mock_awstemp_awstemp, mock_cli_arguments):
     assert mock_awstemp.export.call_args_list == [call(mock_parse_args.profile)]
 
 
+@patch("awstemp.cli.setup_shell")
+@patch("awstemp.cli.arguments")
+def test_main_calls_cli_init(mock_cli_arguments, mock_cli_setup_shell):
+    """Tests that the cli export command is called"""
+
+    mock_parse_args = Mock()
+    mock_parse_args.name = "init"
+
+    mock_cli_arguments.return_value = (None, mock_parse_args)
+
+    awstemp.cli.main()
+
+    assert mock_cli_setup_shell.call_args_list == [call(mock_parse_args)]
+
+
 @patch("awstemp.cli.arguments")
 @patch("awstemp.awstemp.AWSTEMP")
 def test_main_calls_cli_assume(mock_awstemp_awstemp, mock_cli_arguments):
@@ -112,8 +127,62 @@ def test_arguments():
         "backup",
         "clean",
         "export",
+        "init",
         "list",
         "sessions",
         "status",
     ]:
         assert subparser in subparsers
+
+
+@pytest.mark.parametrize("shell", ["bash", "zsh", "fish"])
+@patch("psutil.Process.name")
+def test_get_shell(mock_psutil_process_name, shell):
+    """Test parent shell detection"""
+    mock_psutil_process_name.return_value = shell
+    assert awstemp.cli.get_shell(None) == shell
+
+
+def test_get_shell_force():
+    """Test parent shell forced"""
+    shell = "bash"
+    assert awstemp.cli.get_shell(shell) == shell
+
+
+def test_get_shell_unknown():
+    """Test parent shell detection exits on unhandled shell unknown"""
+    with pytest.raises(SystemExit) as exception:
+        awstemp.cli.get_shell("unhandled")
+    assert exception.value.code == 1
+
+
+@pytest.mark.parametrize("shell", ["bash", "zsh", "fish"])
+@patch("awstemp.cli.get_shell")
+@patch("builtins.print")
+def test_setup_shell_message(mock_print, mock_awstemp_cli_get_shell, shell):
+    """Test shell setup init message is correct"""
+    mock_awstemp_cli_get_shell.return_value = shell
+    args = Mock()
+    args.init = None
+    args.shell = shell
+    awstemp.cli.setup_shell(args)
+
+    assert mock_print.call_args_list == [call(awstemp.cli.INIT_MESSAGE[shell])]
+
+
+@pytest.mark.parametrize(
+    "shell,expected", [("bash", "bash"), ("zsh", "bash"), ("fish", "fish")]
+)
+@patch("awstemp.cli.get_shell")
+@patch("importlib.resources.read_text")
+def test_setup_shell_wrapper(
+    mock_read_text, mock_awstemp_cli_get_shell, shell, expected
+):
+    """Test shell setup returns correct wrapper script"""
+    mock_awstemp_cli_get_shell.return_value = shell
+    args = Mock()
+    args.init = True
+    args.shell = shell
+    awstemp.cli.setup_shell(args)
+
+    assert mock_read_text.call_args_list == [call("awstemp.wrappers", expected)]
