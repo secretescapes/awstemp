@@ -9,6 +9,8 @@ import pytest
 from awstemp import awstemp
 from tests.helpers import data, mocks
 
+ENCODING = "utf-8"
+
 
 def raise_keyboard_interrupt():
     """Wrapper for lambdas to execute exceptions"""
@@ -66,8 +68,8 @@ def test_clean(mock_file, instance):
     instance.clean()
 
     assert mock_file.call_args_list == [
-        call("AWS_SHARED_CREDENTIALS_FILE", "w", encoding="locale"),
-        call("AWS_CONFIG_FILE", "w", encoding="locale"),
+        call("AWS_SHARED_CREDENTIALS_FILE", "w", encoding=ENCODING),
+        call("AWS_CONFIG_FILE", "w", encoding=ENCODING),
     ]
 
     for call_args in mock_file.mock_calls:
@@ -80,8 +82,8 @@ def test_syntax(mock_file, instance):
     """Test that # vim syntax is added when not exists in file"""
     instance.syntax("path")
 
-    assert call("path", "r", encoding="locale") in mock_file.mock_calls
-    assert call("path", "a", encoding="locale") in mock_file.mock_calls
+    assert call("path", "r", encoding=ENCODING) in mock_file.mock_calls
+    assert call("path", "a", encoding=ENCODING) in mock_file.mock_calls
     assert call().write(awstemp.AWSTEMP.vimsyntax) in mock_file.mock_calls
 
 
@@ -90,8 +92,8 @@ def test_syntax_skipped(mock_file, instance):
     """Test that # vim syntax is skipped added when exists in file"""
     instance.syntax("path")
 
-    assert call("path", "r", encoding="locale") in mock_file.mock_calls
-    assert call("path", "a", encoding="locale") not in mock_file.mock_calls
+    assert call("path", "r", encoding=ENCODING) in mock_file.mock_calls
+    assert call("path", "a", encoding=ENCODING) not in mock_file.mock_calls
     assert call().write(awstemp.AWSTEMP.vimsyntax) not in mock_file.mock_calls
 
 
@@ -223,7 +225,7 @@ def test_assume_without_mfa(mock_file, monkeypatch, instance, parameters):
     instance.syntax = lambda a: None
 
     assert instance.assume(role) == expected
-    assert mock_file.call_args_list == [call(x, "w", encoding="locale") for x in writes]
+    assert mock_file.call_args_list == [call(x, "w", encoding=ENCODING) for x in writes]
 
 
 @patch("builtins.input", lambda token: "TOKEN")
@@ -237,8 +239,8 @@ def test_assume_with_mfa(mock_file, monkeypatch, instance):
 
     assert instance.assume("role2") == "created"
     assert mock_file.call_args_list == [
-        call("AWS_CONFIG_FILE", "w", encoding="locale"),
-        call("AWS_SHARED_CREDENTIALS_FILE", "w", encoding="locale"),
+        call("AWS_CONFIG_FILE", "w", encoding=ENCODING),
+        call("AWS_SHARED_CREDENTIALS_FILE", "w", encoding=ENCODING),
     ]
 
 
