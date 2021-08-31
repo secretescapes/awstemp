@@ -10,6 +10,9 @@ usage:
 clean:
 	rm -rf dist *.xml .coverage .tox
 	find . -type d -name __pycache__ -exec rm -rv {} +
+	poetry env remove 3.7 || true
+	poetry env remove 3.8 || true
+	poetry env remove 3.9 || true
 
 setup:
 	pyenv install ${PY37} --skip-existing
