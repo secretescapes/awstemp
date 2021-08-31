@@ -3,6 +3,7 @@ pytest module: awstemp/cli.py
 """
 
 import argparse
+import importlib
 from unittest.mock import Mock, call, patch
 
 import pytest
@@ -23,6 +24,7 @@ def test_main_print_help(mock_cli_arguments, name):
 
     mock_parse_args = Mock()
     mock_parse_args.name = name
+    mock_parse_args.version = None
     mock_parser = Mock()
     mock_parser.print_help = Mock()
 
@@ -42,6 +44,7 @@ def test_main_calls_func(mock_cli_arguments, name):
 
     mock_parse_args = Mock()
     mock_parse_args.name = name
+    mock_parse_args.version = None
     mock_parse_args.func = Mock()
 
     mock_cli_arguments.return_value = (None, mock_parse_args)
@@ -58,6 +61,7 @@ def test_main_calls_cli_export(mock_awstemp_awstemp, mock_cli_arguments):
 
     mock_parse_args = Mock()
     mock_parse_args.name = "export"
+    mock_parse_args.version = None
     mock_parse_args.profile = "profile"
 
     mock_awstemp = Mock()
@@ -78,6 +82,7 @@ def test_main_calls_cli_init(mock_cli_arguments, mock_cli_setup_shell):
 
     mock_parse_args = Mock()
     mock_parse_args.name = "init"
+    mock_parse_args.version = None
 
     mock_cli_arguments.return_value = (None, mock_parse_args)
 
@@ -93,6 +98,7 @@ def test_main_calls_cli_assume(mock_awstemp_awstemp, mock_cli_arguments):
 
     mock_parse_args = Mock()
     mock_parse_args.name = "assume"
+    mock_parse_args.version = None
     mock_parse_args.role = "role"
     mock_parse_args.alias = "alias"
 
@@ -186,3 +192,28 @@ def test_setup_shell_wrapper(
     awstemp.cli.setup_shell(args)
 
     assert mock_read_text.call_args_list == [call("awstemp.wrappers", expected)]
+
+
+@patch("awstemp.cli.arguments")
+@patch("builtins.print")
+def test_main_version(mock_print, mock_cli_arguments):
+    """Tests that generic none parametrized functions are called"""
+
+    mock_parse_args = Mock()
+    mock_parse_args.version = True
+    mock_parse_args.func = Mock()
+    mock_cli_arguments.return_value = (None, mock_parse_args)
+
+    version = "VERSION"
+
+    if importlib.util.find_spec("importlib.metadata"):
+        metadata_package = "importlib.metadata.version"
+    else:
+        metadata_package = "importlib_metadata.version"
+
+    with patch(metadata_package, return_value=version):
+        with pytest.raises(SystemExit) as exception:
+            awstemp.cli.main()
+        assert exception.value.code == 0
+
+    assert mock_print.call_args_list == [call(f"awstemp {version}")]

@@ -6,6 +6,11 @@ import importlib.resources
 import os
 import sys
 
+try:
+    from importlib import metadata
+except ImportError:  # pragma: no cover - 3.7 only
+    import importlib_metadata as metadata  # pragma: no cover - 3.7 only
+
 import argcomplete
 import psutil
 
@@ -97,6 +102,10 @@ def arguments(cli):
     )
     sessions_parser.set_defaults(func=cli.sessions)
 
+    parser.add_argument(
+        "-v", "--version", action="store_true", help="Show package version"
+    )
+
     argcomplete.autocomplete(parser)
     return parser, parser.parse_args()
 
@@ -119,7 +128,6 @@ def setup_shell(args):
         print(INIT_MESSAGE[shell])
     else:
         shell = "bash" if shell == "zsh" else shell
-        # print(importlib_resources.files("awstemp.wrappers").joinpath(shell).read_text())
         print(importlib.resources.read_text("awstemp.wrappers", shell))
 
 
@@ -128,6 +136,10 @@ def main():
 
     cli = awstemp.AWSTEMP()
     parser, args = arguments(cli)
+
+    if args.version:
+        print(f"awstemp {metadata.version('awstemp')}")
+        sys.exit(0)
 
     if args.name == "assume":
         cli.assume(args.role, args.alias)
