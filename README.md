@@ -23,7 +23,7 @@ Most common setups:
 ### `Bash`
 
 ```
-register-python-argcomplete awstemp > /etc/bash_completion.d/awstemp
+register-python-argcomplete awstemp | sudo tee /etc/bash_completion.d/awstemp
 ```
 
 ### `Zsh`
